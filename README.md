@@ -1,101 +1,71 @@
-**中文** | [English](README_EN.md)
+# Kernel Build Action For Lancelot & Merlin
 
-# KernelSU Action For Begonia
+## Usage
+> After successful build, it will upload AnyKernel3 in `Action`, which has turned off device check, please flash to phone in Twrp.
 
-用于 Non-GKI Kernel 的 Action，具有一定的普遍性，需要了解内核及 Android 的相关知识得以运用。
+First fork this repository to your repository and edit config.env as follows, then click `Star` or `Action`, you will see `Build Kernel` option on the left side, click it and you will see `Run workflows` on the top of the big dialog box on the right side, click it and it will start the build.
 
-## 警告:warning: :warning: :warning:
+### KERNEL_SOURCE
 
-如果你不是内核作者，使用他人的劳动成果构建KernelSU，请仅供自己使用，不要分享给别人，这是对作者的劳动成果的尊重。
+Type your kernel link
 
-## 支持内核
+e.g. https://github.com/Jbub5/android_kernel_xiaomi_mt6768
 
-- `4.19`
-- `4.14`
+### KERNEL_SOURCE_BRANCH
 
-## 使用
+Type your kernel branch
 
-> 编译成功后，会在`Action`上传 AnyKernel3，已经关闭设备检查，请在 Twrp 刷入。
+e.g. kernel-tree
 
-Fork 本仓库到你的储存库然后按照以下内容编辑config.env，之后点击`Star`或`Action`，在左侧可看见`Build Kernel`选项，点击选项会看见右边的大对话框的上面会有`Run workflows`点击它会启动构建。
+### KERNEL_DEFCONFIG
 
-### Kernel Source
+Type your kernel defconfig
 
-填写你的内核仓库地址
+e.g. lancelot_defconfig
 
-例如: https://github.com/begonia-dev/android_kernel_xiaomi_mt6785
+### TARGET_ARCH
 
-### Kernel Source Branch
+e.g. arm64
 
-填写你的内核分支
+### KERNEL_FILE
 
-例如: 13.0
+Type in the image you need, usually the same as BOARD_KERNEL_IMAGE_NAME in your aosp-device tree.
 
-### Kernel defconfig
+e.g. Image.gz-dtb
 
-填写你的内核配置文件名
+### EXTRA_BUILD_COMMAND
+Some kernels require some build commands to be typed in manually in order to build properly, so please don't type them in if you don't need to.
+Separate commands with spaces.
 
-例如: begonia_user_defconfig
+e.g. LLVM=1 LLVM_IAS=1
 
-### Target arch
+### USE_KERNELSU
 
-例如: arm64
+Adds KernelSU 1.0.1 support
 
-### Kernel file
+### KSU_HOOKS_PATCH
 
-填写需要刷写的 image，一般与你的 aosp-device tree 里的 BOARD_KERNEL_IMAGE_NAME 是一致的
+Adds hooks for KernelSU, useful if they have not already been included in the kernel
 
-例如: Image.gz-dtb
+### SUPPORT_APATCH
 
-### Clang version
+Adds APatch support, installation instructions: https://apatch.dev/install.html
 
-默认版本为zyc clang17.0.0，如果需要更改，可前往build-kernel.yml进行修改
+### NEED_DTBO
 
-一般 Clang12 就能通过大部分 4.14 及以上的内核的编译
-我自己的 Redmi Note 8 Pro 4.14 使用的是 clang17.0.0
+If your kernel also needs to be flashed with DTBO image, set it to true.
 
-### Extra build commands
+### MAKE_BOOT_IMAGE
+> Merge from build_boot_image.yml
 
-有的内核需要手动加入一些编译命令，才能正常编译，不需要的话不填写即可
-请在命令与命令之间用空格隔开
+Set to true, boot.img will be Make, you need to provide `Source boot image`
 
-例如: LLVM=1 LLVM_IAS=1
-
-### Disable LTO
-
-用于优化内核，但有些时候会导致错误，所以提供禁用它，设置为 true 即禁用
-
-### Use KernelSU
-
-是否使用 KernelSU，用于排查内核故障或单独编译内核
-
-### Use Kprobes
-
-如果你的内核 Kprobes 工作正常这项改成 true 即可自动在 defconfig 注入参数
-
-### Use overlayfs
-
-内核没有该参数的话请启用，模块需要
-
-### Need DTBO
-
-如果你的内核还需要刷入DTBO，请设置为true
-
-### Make boot image
-> 从之前的Workflows合并进来的，可以查看历史提交
-
-设置为true会编译boot.img，需要你提供`Source boot image`
-
-### Source boot image
-
-故名思义，提供一个源系统可以正常开机的 boot 镜像，需要直链，最好是同一套内核源码以及与你当前系统同一套设备树从 aosp 构建出来的。ramdisk 里面包含分区表以及 init，没有的话构建出来的镜像会无法正常引导。
-
-例如: https://raw.githubusercontent.com/xiaoleGun/KernelSU_action/main/boot/boot-wayne-from-Miku-UI-latest.img
-
-## 感谢
+## Credits
 
 - [AnyKernel3](https://github.com/osm0sis/AnyKernel3)
 - [AOSP](https://android.googlesource.com)
 - [KernelSU](https://github.com/tiann/KernelSU)
 - [xiaoxindada](https://github.com/xiaoxindada)
 - [xiaoleGun](https://github.com/xiaoleGun)
+- [Shas45558](https://github.com/Shas45558)
+- [WuXing90](https://github.com/WuXing90)
