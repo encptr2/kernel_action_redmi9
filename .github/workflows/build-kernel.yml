@@ -33,8 +33,15 @@ jobs:
         echo "BUILD_TIME=$(TZ=UTC date "+%Y%m%d%H%M")" >> $GITHUB_ENV
         echo "DEVICE=$(echo ${{ env.KERNEL_DEFCONFIG }} | sed 's!vendor/!!;s/_defconfig//;s/_user//;s/-perf//')" >> $GITHUB_ENV
         sudo apt-get update
-        sudo apt-get install autoconf automake binutils bison debugedit fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make patch pkgconf sed texinfo which binutils-aarch64-linux-gnu git ccache zip curl bc unzip device-tree-compiler python3 musl aria2
+        sudo apt-get install autoconf automake binutils bison debugedit fakeroot file findutils flex gawk gcc gettext grep groff gzip libtool m4 make patch pkgconf sed texinfo binutils-aarch64-linux-gnu git ccache zip curl bc unzip device-tree-compiler python3 musl aria2
         mkdir -p $GITHUB_WORKSPACE/kernel_workspace
+        mkdir -p $GITHUB_WORKSPACE/compat
+        echo -e '#!/usr/bin/env bash\ncommand -v "$@"' > $GITHUB_WORKSPACE/compat/which
+        echo -e '#!/usr/bin/env bash\ngrep -E "$@"' > $GITHUB_WORKSPACE/compat/egrep
+        echo -e '#!/usr/bin/env bash\ngrep -F "$@"' > $GITHUB_WORKSPACE/compat/fgrep
+        chmod 555 $GITHUB_WORKSPACE/compat/which
+        chmod 555 $GITHUB_WORKSPACE/compat/egrep
+        chmod 555 $GITHUB_WORKSPACE/compat/fgrep
 
     - name: Download Clang Toolchain
       run: |
@@ -63,6 +70,7 @@ jobs:
         grep -q "kernelsu" "$DRIVER_MAKEFILE" || printf "\nobj-\$(CONFIG_KSU) += kernelsu/\n" >> "$DRIVER_MAKEFILE" && echo "[+] Modified Makefile."
         grep -q "source \"drivers/kernelsu/Kconfig\"" "$DRIVER_KCONFIG" || sed -i "/endmenu/i\source \"drivers/kernelsu/Kconfig\"" "$DRIVER_KCONFIG" && echo "[+] Modified Kconfig."
         echo '[+] Done.'
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
         echo "CONFIG_KSU=y" >> arch/${{ env.TARGET_ARCH }}/configs/${{ env.KERNEL_DEFCONFIG }}
         if [ ${{ env.KSU_HOOKS_PATCH }} = true ]; then
             git apply $GITHUB_WORKSPACE/KernelSU.patch
@@ -102,7 +110,7 @@ jobs:
     - name: Build kernel
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang/bin:$PATH
+        export PATH=$GITHUB_WORKSPACE/kernel_workspace/clang/bin:$GITHUB_WORKSPACE/compat:$PATH
         export ARCH=${{ env.TARGET_ARCH }}
         export SUBARCH=${{ env.TARGET_ARCH }}
         export KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
