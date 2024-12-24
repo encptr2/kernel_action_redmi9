@@ -136,7 +136,7 @@ jobs:
     - name: Make Anykernel3
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace
-        git clone --depth=1 --no-tags --single-branch --branch proton https://github.com/Jbub5/AnyKernel3.git AnyKernel3
+        git clone --depth=1 --no-tags --single-branch --branch master https://github.com/encptr2/AnyKernel3.git AnyKernel3
         if [ ${{ env.CHECK_FILE_IS_OK }} = true ]; then
             cp android-kernel/out/arch/${{ env.TARGET_ARCH }}/boot/${{ env.KERNEL_FILE }} AnyKernel3/
         elif [ ${{ env.CHECK_DTBO_IS_OK }} = true ]; then
